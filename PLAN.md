@@ -19,9 +19,9 @@ This plan outlines the steps to implement the "Code as Specification" pattern us
 
 **Goal:** Set up the TypeScript and Vitest environment for the `typescript-vitest` implementation.
 
-- [ ] **Update `implementations/typescript-vitest/package.json`:**
+- [x] **Update `implementations/typescript-vitest/package.json`:**
   - Add `fast-check` for property-based testing.
-  - Dependencies: `typescript`, `vitest`, `c8`, `ts-node`, `fast-check`.
+  - Dependencies: `typescript`, `vitest`, `ts-node`, `fast-check`.
 - [x] **Create `implementations/typescript-vitest/tsconfig.json`:**
   - Configure for Node.js environment, ESNext modules.
 - [x] **Create `implementations/typescript-vitest/vitest.config.ts`:**
@@ -45,7 +45,7 @@ This plan outlines the steps to implement the "Code as Specification" pattern us
 
 - [x] **Implement Builder (`test/fixtures/cart-builder.ts`):**
   - `CartBuilder` class for static example tests.
-- [ ] **Implement Arbitraries (`test/fixtures/arbitraries.ts`):**
+- [x] **Implement Arbitraries (`test/fixtures/arbitraries.ts`):**
   - Create `fast-check` arbitraries for `CartItem`, `User`, and complete `Carts`.
   - These generators will power the property-based tests.
 
@@ -53,10 +53,9 @@ This plan outlines the steps to implement the "Code as Specification" pattern us
 
 **Goal:** Create the "Principal QE" artifact—a generated Markdown report that serves as an audit log.
 
-- [ ] **Update Reporter (`test/reporters/attestation-reporter.ts`):**
+- [x] **Update Reporter (`test/reporters/attestation-reporter.ts`):**
   - **Hierarchy:** Support nested `describe` blocks (System -> Area -> Feature -> Scenario).
   - **Metadata:** Capture and display:
-    - **Seed** (Property-based testing).
     - **Git Hash** (Current commit).
     - **Execution Time**.
     - **Dirty State** (List of modified/untracked files).
@@ -65,7 +64,7 @@ This plan outlines the steps to implement the "Code as Specification" pattern us
     - Generate `attestation.md`.
     - Generate `attestation.html` (Styled for easy viewing).
   - **Content:**
-    - Header with Timestamp & Global Seed.
+    - Header with Timestamp.
     - **Executive Summary:** High-level pass/fail stats.
     - **Detailed Audit:** Nested sections mirroring the test structure.
 
@@ -73,19 +72,30 @@ This plan outlines the steps to implement the "Code as Specification" pattern us
 
 **Goal:** Write tests that generate thousands of scenarios to prove the Strategy holds true under any condition.
 
-- [ ] **Refactor Tests (`test/pricing.test.ts`):**
+- [x] **Refactor Tests (`test/pricing.test.ts`):**
   - Use `fc.assert(fc.property(...))` to define invariants.
   - Example Property: "For ANY cart with items > 3 quantity, the bulk discount MUST be applied."
   - Example Property: "For ANY combination of inputs, total discount MUST NOT exceed 30%."
   - Retain some specific "Example-Based" tests for documentation clarity (e.g., the specific examples in the Strategy doc).
 
-## 7. CI/CD & Automation (New)
+## 7. Deep Observability (IO Tracing)
+
+**Goal:** Provide "Network Tab" level detail in static reports without infrastructure overhead.
+
+- [x] **Implement `TestTracer`:**
+  - Create a global interaction store mapped to Vitest test names.
+- [x] **Instrument Domain Boundary:**
+  - Update `CartBuilder` to automatically log all inputs and outputs to the tracer.
+- [x] **Rich HTML Reporting:**
+  - Enhance the HTML reporter to display collapsible JSON interaction logs for every test scenario.
+
+## 8. CI/CD & Automation
 
 **Goal:** Automate execution and artifact preservation.
 
-- [ ] **GitHub Actions (`.github/workflows/ci.yml`):**
+- [x] **GitHub Actions (`.github/workflows/ci.yml`):**
   - Trigger on Push/PR.
   - Steps: Checkout, Install, Test.
   - **Artifacts:** Upload the contents of the `reports/` directory as a build artifact.
-- [ ] **Git Configuration (`.gitignore`):**
+- [x] **Git Configuration (`.gitignore`):**
   - Ignore the generated `reports/` directory locally to prevent noise.
