@@ -2,6 +2,7 @@ import { Reporter, File, Suite, Task } from 'vitest';
 import * as fs from 'fs';
 import * as path from 'path';
 import { execSync } from 'child_process';
+import { tracer } from '../modules/tracer';
 
 export default class AttestationReporter implements Reporter {
   private startTime: number = 0;
@@ -34,8 +35,7 @@ export default class AttestationReporter implements Reporter {
     fs.writeFileSync(path.join(reportDir, 'attestation.md'), markdown);
     fs.writeFileSync(path.join(reportDir, 'attestation.html'), html);
 
-    console.log(`
-[Attestation] Reports generated in: ${reportDir}`);
+    console.log(`\n[Attestation] Reports generated in: ${reportDir}`);
   }
 
   private getGitInfo() {
@@ -50,10 +50,8 @@ export default class AttestationReporter implements Reporter {
 
   private generateMarkdown(files: File[], gitInfo: { hash: string, dirtyFiles: string }, duration: string): string {
     let md = `# Pricing Engine: Quality Assurance Attestation\n\n`;
-    md += `**Generated:** ${new Date().toLocaleString()}
-`;
-    md += `**Duration:** ${duration}s
-`;
+    md += `**Generated:** ${new Date().toLocaleString()}\n`;
+    md += `**Duration:** ${duration}s\n`;
     md += `**Git Hash:** 
 ${gitInfo.hash}
 
@@ -189,23 +187,17 @@ ${gitInfo.dirtyFiles}
     let output = '';
 
     if (task.type === 'suite') {
-      output += `
-${indent} ${task.name}
-
-`;
+      output += `\n${indent} ${task.name}\n\n`;
       const hasDirectTests = task.tasks.some(t => t.type === 'test');
       if (hasDirectTests) {
-         output += `| Scenario | Result | Duration |
-`;
-         output += `| :--- | :--- | :--- |
-`;
+         output += `| Scenario | Result | Duration |\n`;
+         output += `| :--- | :--- | :--- |\n`;
       }
       task.tasks.forEach(subTask => output += this.renderTaskMd(subTask, level + 1));
     } else if (task.type === 'test') {
       const status = task.result?.state === 'pass' ? '✅ PASS' : '❌ FAIL';
       const duration = task.result?.duration ? `${task.result.duration}ms` : '-';
-      output += `| ${task.name} | ${status} | ${duration} |
-`;
+      output += `| ${task.name} | ${status} | ${duration} |\n`;
     }
     return output;
   }

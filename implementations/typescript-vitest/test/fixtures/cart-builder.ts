@@ -1,5 +1,6 @@
 import { CartItem, User, PricingResult } from '../../src/types';
 import { PricingEngine } from '../../src/pricing-engine';
+import { tracer } from '../modules/tracer';
 
 export class CartBuilder {
   private items: CartItem[] = [];
@@ -30,7 +31,12 @@ export class CartBuilder {
   }
 
   calculate(): PricingResult {
-    return PricingEngine.calculate(this.items, this.user);
+    const input = { items: this.items, user: this.user };
+    const output = PricingEngine.calculate(this.items, this.user);
+    
+    tracer.log(input, output);
+    
+    return output;
   }
 
   // Helper for reporter to see inputs
