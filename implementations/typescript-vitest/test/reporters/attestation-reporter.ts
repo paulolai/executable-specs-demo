@@ -108,7 +108,7 @@ ${gitInfo.dirtyFiles}
     return md;
   }
 
-  private generateHtml(files: File[], gitInfo: { hash: string, dirtyFiles: string }, duration: string): string {
+  private generateHtml(files: File[], gitInfo: { hash: string, dirtyFiles: string }, duration: string, includeTraces: boolean): string {
     let html = `<!DOCTYPE html>
 <html>
 <head>
@@ -160,7 +160,7 @@ ${gitInfo.dirtyFiles}
 
     files.forEach(file => {
       file.tasks.forEach(task => {
-        html += this.renderTaskHtml(task, 0);
+        html += this.renderTaskHtml(task, 0, includeTraces);
       });
     });
 
@@ -207,7 +207,7 @@ ${indent} ${task.name}
     return output;
   }
 
-  private renderTaskHtml(task: Task, level: number): string {
+  private renderTaskHtml(task: Task, level: number, includeTraces: boolean): string {
     let output = '';
     if (task.type === 'suite') {
       const margin = level * 20;
@@ -226,28 +226,29 @@ ${indent} ${task.name}
                  const duration = subTask.result?.duration ? `${subTask.result.duration}ms` : '-';
                  
                  // Fetch Interactions
-                 const interactions = tracer.get(getFullTestName(subTask));
                  let details = '';
-                 
-                 if (interactions.length > 0) {
-                   details = `<details><summary>View Input/Output (${interactions.length} interactions)</summary>`;
-                   interactions.forEach((interaction, idx) => {
-                     details += `
-                       <div style="margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px;">
-                         <div style="font-size: 0.8em; color: #999; margin-bottom: 5px;">Interaction #${idx + 1}</div>
-                         <div class="io-block">
-                           <div class="io-section">
-                             <div class="io-label">Input</div>
-                             <pre>${JSON.stringify(interaction.input, null, 2)}</pre>
-                           </div>
-                           <div class="io-section">
-                             <div class="io-label">Output</div>
-                             <pre>${JSON.stringify(interaction.output, null, 2)}</pre>
-                           </div>
-                         </div>
-                       </div>`;
-                   });
-                   details += `</details>`;
+                 if (includeTraces) {
+                    const interactions = tracer.get(getFullTestName(subTask));
+                    if (interactions.length > 0) {
+                      details = `<details><summary>View Input/Output (${interactions.length} interactions)</summary>`;
+                      interactions.forEach((interaction, idx) => {
+                        details += `
+                          <div style="margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px;">
+                            <div style="font-size: 0.8em; color: #999; margin-bottom: 5px;">Interaction #${idx + 1}</div>
+                            <div class="io-block">
+                              <div class="io-section">
+                                <div class="io-label">Input</div>
+                                <pre>${JSON.stringify(interaction.input, null, 2)}</pre>
+                              </div>
+                              <div class="io-section">
+                                <div class="io-label">Output</div>
+                                <pre>${JSON.stringify(interaction.output, null, 2)}</pre>
+                              </div>
+                            </div>
+                          </div>`;
+                      });
+                      details += `</details>`;
+                    }
                  }
 
                  output += `<tr><td>${subTask.name}${details}</td><td class="${statusClass}">${status}</td><td>${duration}</td></tr>`;
