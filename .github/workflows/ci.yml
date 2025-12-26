@@ -36,18 +36,35 @@ jobs:
       - name: Display Attestation Summary
         if: always()
         run: |
-          echo "## 📊 Test Attestation Summary"
-          echo ""
+          echo "::group::📊 Attestation Summary"
           cd implementations/typescript-vitest
           # Find the most recent attestation report
           LATEST_REPORT=$(ls -t ../../reports/*/attestation.md 2>/dev/null | head -1)
           if [ -n "$LATEST_REPORT" ]; then
-            echo "### Report Location: $LATEST_REPORT"
-            echo ""
+            echo "📄 Report: $LATEST_REPORT"
             echo ""
             cat "$LATEST_REPORT"
           else
             echo "❌ No attestation report found"
+          fi
+          echo "::endgroup::"
+
+      - name: Add Markdown Summary
+        if: always()
+        run: |
+          cd implementations/typescript-vitest
+          # Find the most recent attestation report
+          LATEST_REPORT=$(ls -t ../../reports/*/attestation.md 2>/dev/null | head -1)
+          if [ -n "$LATEST_REPORT" ]; then
+            {
+              echo "# 📊 Test Attestation Report"
+              echo ""
+              cat "$LATEST_REPORT"
+            } >> $GITHUB_STEP_SUMMARY
+          else
+            echo "# 📊 Attestation Report" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "❌ No attestation report found" >> $GITHUB_STEP_SUMMARY
           fi
 
       - name: Upload Attestation Reports
