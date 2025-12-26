@@ -49,3 +49,27 @@ Before writing code, you must ingest the following context:
 *   ❌ **Do NOT** suggest Cucumber/Gherkin/Selenium.
 *   ❌ **Do NOT** use `any` type (Strict TypeScript).
 *   ❌ **Do NOT** write console logs for verification (Use the Reporter).
+
+## 🧪 Testing Guidelines
+
+### Property-Based Testing
+- **Invariants over Examples:** Prefer `fast-check` properties that prove business rules hold for *all* valid inputs over static examples.
+- **Example Tests:** Use standard unit tests (`it(...)`) primarily for documentation and "happy path" readability.
+
+### Deep Observability (Tracer)
+- **Mandatory Instrumentation:** All tests must capture their inputs and outputs to the `tracer`.
+- **Boilerplate Pattern:**
+  ```typescript
+  it('Invariant: ...', () => {
+    const testName = expect.getState().currentTestName!;
+    fc.assert(
+      fc.property(arbitraries..., (inputs...) => {
+        const result = DomainLogic.execute(inputs...);
+        // Log interaction for the report
+        tracer.log(testName, { inputs }, result);
+        return result.isValid;
+      })
+    );
+  });
+  ```
+- **Builder Pattern:** When using builders (like `CartBuilder`), ensure the `.calculate()` method accepts an optional `testName` to handle logging internally for static examples.

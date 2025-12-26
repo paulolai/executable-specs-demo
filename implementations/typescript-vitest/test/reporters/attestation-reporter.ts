@@ -57,7 +57,6 @@ export default class AttestationReporter implements Reporter {
   private generateMarkdown(files: File[], gitInfo: { hash: string, dirtyFiles: string }, duration: string): string {
     let md = `# Pricing Engine: Quality Assurance Attestation\n\n`;
     md += `**Generated:** ${new Date().toLocaleString()}\n`;
-    md += `**Duration:** ${duration}s\n`;
     md += `**Git Hash:** 
 ${gitInfo.hash}
 
@@ -133,7 +132,7 @@ ${gitInfo.dirtyFiles}
   
   <div class="metadata">
     <p><strong>Generated:</strong> ${new Date().toLocaleString()}</p>
-    <p><strong>Duration:</strong> ${duration}s</p>
+    ${includeTraces ? `<p><strong>Duration:</strong> ${duration}s</p>` : ''}
     <p><strong>Git Hash:</strong> <code>${gitInfo.hash}</code></p>
     ${gitInfo.dirtyFiles ? `<div class="warning"><strong>⚠️ Uncommitted Changes:</strong><pre>${gitInfo.dirtyFiles}</pre></div>` : ''}
   </div>
@@ -196,14 +195,13 @@ ${indent} ${task.name}
 `;
       const hasDirectTests = task.tasks.some(t => t.type === 'test');
       if (hasDirectTests) {
-         output += `| Scenario | Result | Duration |\n`;
-         output += `| :--- | :--- | :--- |\n`;
+         output += `| Scenario | Result |\n`;
+         output += `| :--- | :--- |\n`;
       }
       task.tasks.forEach(subTask => output += this.renderTaskMd(subTask, level + 1));
     } else if (task.type === 'test') {
       const status = task.result?.state === 'pass' ? '✅ PASS' : '❌ FAIL';
-      const duration = task.result?.duration ? `${task.result.duration}ms` : '-';
-      output += `| ${task.name} | ${status} | ${duration} |\n`;
+      output += `| ${task.name} | ${status} |\n`;
     }
     return output;
   }
@@ -219,12 +217,13 @@ ${indent} ${task.name}
       
       const hasDirectTests = task.tasks.some(t => t.type === 'test');
       if (hasDirectTests) {
-         output += `<table><tr><th style="width: 60%">Scenario</th><th style="width: 10%">Result</th><th style="width: 10%">Duration</th></tr>`;
+         const durationHeader = includeTraces ? '<th style="width: 10%">Duration</th>' : '';
+         output += `<table><tr><th style="width: 60%">Scenario</th><th style="width: 10%">Result</th>${durationHeader}</tr>`;
          task.tasks.forEach(subTask => {
              if (subTask.type === 'test') {
                  const status = subTask.result?.state === 'pass' ? '✅ PASS' : '❌ FAIL';
                  const statusClass = subTask.result?.state === 'pass' ? 'status-pass' : 'status-fail';
-                 const duration = subTask.result?.duration ? `${subTask.result.duration}ms` : '-';
+                 
                  
                  // Fetch Interactions
                  let details = '';
@@ -252,7 +251,8 @@ ${indent} ${task.name}
                     }
                  }
 
-                 output += `<tr><td>${subTask.name}${details}</td><td class="${statusClass}">${status}</td><td>${duration}</td></tr>`;
+                 const durationCell = includeTraces ? `<td>${subTask.result?.duration ? `${subTask.result.duration}ms` : '-'}</td>` : '';
+                 output += `<tr><td>${subTask.name}${details}</td><td class="${statusClass}">${status}</td>${durationCell}</tr>`;
              }
          });
          output += `</table>`;
