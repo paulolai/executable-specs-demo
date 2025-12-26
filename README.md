@@ -121,6 +121,6 @@ npm test
 Run both implementations to experience the difference:
 
 1. **Executable Specs**: 47 tests generate 1000s of random cases, execute in ~0.7s
-2. **Gherkin/Cucumber**: 27 hand-written scenarios, execute in ~0.05s (after 3s compile)
+2. **Gherkin/Cucumber**: 66 hand-written scenarios (with examples tables), 325 steps, execute in ~0.05s (after 3s compile)
 
 **See detailed comparison:** [`docs/GERHKIN_VS_EXECUTABLE.md`](docs/GERHKIN_VS_EXECUTABLE.md) - Includes code metrics, refactoring scenarios, and cost of ownership analysis.
