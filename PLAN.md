@@ -96,6 +96,23 @@ This plan outlines the steps to implement the "Code as Specification" pattern us
 - [x] **GitHub Actions (`.github/workflows/ci.yml`):**
   - Trigger on Push/PR.
   - Steps: Checkout, Install, Test.
-  - **Artifacts:** Upload the contents of the `reports/` directory as a build artifact.
-- [x] **Git Configuration (`.gitignore`):**
-  - Ignore the generated `reports/` directory locally to prevent noise.
+    - **Artifacts:** Upload the contents of the `reports/` directory as a build artifact.
+  - [x] **Git Configuration (`.gitignore`):**
+    - Ignore the generated `reports/` directory locally to prevent noise.
+  
+  ## 9. Shipping Feature & Refactoring
+  
+  **Goal:** Expand the business rules to include shipping logic and ensure calculation precision.
+  
+  - [x] **Cents-Based Refactoring:**
+    - Convert all monetary values to integer `Cents` to eliminate floating-point errors.
+    - Update all tests to use exact integer assertions.
+  - [x] **Shipping Logic (`src/pricing-engine.ts`):**
+    - **Base Rule:** $7 flat rate + $2/kg surcharge.
+    - **Free Shipping:** Free for orders >   00 (after discounts).
+    - **Expedited:** +15% of original subtotal.
+    - **Express:** Flat $25 override.
+  - [x] **Verification:**
+    - Added 40+ new shipping tests (examples & invariants).
+    - Validated all 47 tests pass with 100% success rate.
+  
